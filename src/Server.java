@@ -64,6 +64,9 @@ public class Server {
                     this.username = initialUsername;
                 }
 
+                // Send the assigned username back to the client
+                output.println(this.username);
+
                 sendToAllClients(username + " has joined the chat");
 
                 String message;
