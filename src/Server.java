@@ -12,11 +12,15 @@ public class Server {
         this.port = port;
     }
 
+    // Start the server
     public void start() {
         System.out.println("Server started on port " + port);
+        System.out.println("Hello admin, welcome to the server! If you want to broadcast a message to all the current clients, please type your message and press enter.\n");
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            // Thread to read server console input
             new Thread(this::readServerInput).start();
 
+            // Accept client connections
             while (true) {
                 new ClientHandler(serverSocket.accept()).start();
             }
@@ -25,6 +29,7 @@ public class Server {
         }
     }
 
+    // Read server console input and broadcast to clients
     private void readServerInput() {
         try (BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in))) {
             String message;
@@ -36,6 +41,7 @@ public class Server {
         }
     }
 
+    // Send a message to all connected clients
     public void sendToAllClients(String message) {
         for (PrintWriter writer : clientWriters) {
             writer.println(message);
@@ -67,8 +73,10 @@ public class Server {
                 // Send the assigned username back to the client
                 output.println(this.username);
 
+                // Notify all clients about the new client
                 sendToAllClients(username + " has joined the chat");
 
+                // Read and broadcast messages from the client
                 String message;
                 while ((message = input.readLine()) != null) {
                     sendToAllClients(username + ": " + message);
@@ -84,17 +92,20 @@ public class Server {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                // Notify all clients about the client leaving
                 sendToAllClients(username + " has left the chat");
             }
         }
     }
 
     public static void main(String[] args) {
+        // Check if correct number of arguments are provided
         if (args.length != 1) {
             System.out.println("Usage: java Server <port>");
             return;
         }
 
+        // Parse port argument and start server
         int port = Integer.parseInt(args[0]);
         new Server(port).start();
     }
